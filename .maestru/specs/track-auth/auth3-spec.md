@@ -15,7 +15,7 @@ created: 2026-06-22
 
 The orchestrator that **spawns and tears down a per-user daemon+web pair on demand**, keyed by the namespace + `OD_DATA_DIR` from AUTH2, all sharing the one org `~/.claude` (Claude Code). It populates the registry the AUTH2 router proxies against. Verified: `OD_DATA_DIR=<dir> tools-dev run web --namespace <ns>` runs an isolated instance; ports auto-allocate without collision (`tools/dev/src/shared-ports.ts`); `HOME` (and thus `~/.claude`) is shared across instances (`apps/daemon/src/runtimes/env.ts`); per-instance state (sqlite, projects, MCP tokens, `installation.json`) lives under its own `OD_DATA_DIR`.
 
-No Open Design code changes — pure orchestration around `tools-dev`. Lives in `oktogon/orchestrator/`.
+No Open Design code changes — pure orchestration around `tools-dev`. Lives in `gateway/orchestrator/`.
 
 ## Implementation
 
@@ -35,8 +35,8 @@ No Open Design code changes — pure orchestration around `tools-dev`. Lives in 
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `oktogon/orchestrator/index.ts` | Create | Spawn/teardown per-user tools-dev instances |
-| `oktogon/orchestrator/spawn.ts` | Create | Launch + capture ports + readiness wait |
-| `oktogon/orchestrator/lifecycle.ts` | Create | Idle teardown, LRU cap, parent-death cleanup |
-| `oktogon/router/registry.ts` | Modify | Orchestrator writes instance records here |
+| `gateway/orchestrator/index.ts` | Create | Spawn/teardown per-user tools-dev instances |
+| `gateway/orchestrator/spawn.ts` | Create | Launch + capture ports + readiness wait |
+| `gateway/orchestrator/lifecycle.ts` | Create | Idle teardown, LRU cap, parent-death cleanup |
+| `gateway/router/registry.ts` | Modify | Orchestrator writes instance records here |
 | `.maestru/docs/50-running-in-maestru/05-multi-user.md` | Modify | Document the lifecycle model |

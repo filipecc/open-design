@@ -21,7 +21,7 @@ Security stance: opt-in per artifact, revocable, no enumeration, read-only, no `
 
 ## Implementation
 
-**Phase 1 — Share-token model.** A logged-in user clicks "Share" on an artifact → mint an unguessable token (e.g. 128-bit random) recorded in the **router's** store as `token → { namespace, projectId, artifactPath, createdBy, createdAt, revoked }`. Tokens live in the router/registry layer (`oktogon/`), not in the per-user daemon, so resolution needs no user session.
+**Phase 1 — Share-token model.** A logged-in user clicks "Share" on an artifact → mint an unguessable token (e.g. 128-bit random) recorded in the **router's** store as `token → { namespace, projectId, artifactPath, createdBy, createdAt, revoked }`. Tokens live in the router/registry layer (`gateway/`), not in the per-user daemon, so resolution needs no user session.
 
 **Phase 2 — Public route + oauth2-proxy carve-out.** Expose a single unauthenticated path family, e.g. `GET /share/<token>` (and the static sub-assets it references). Add it to oauth2-proxy `--skip-auth-route=^/share/` so it bypasses login. Everything else stays gated (AUTH1 invariant).
 
@@ -37,9 +37,9 @@ Security stance: opt-in per artifact, revocable, no enumeration, read-only, no `
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `oktogon/router/share.ts` | Create | Token store + `/share/<token>` resolution to one artifact |
-| `oktogon/router/index.ts` | Modify | Route `/share/*` before the auth-required path |
+| `gateway/router/share.ts` | Create | Token store + `/share/<token>` resolution to one artifact |
+| `gateway/router/index.ts` | Modify | Route `/share/*` before the auth-required path |
 | `deploy/oauth2-proxy.cfg` | Modify | `--skip-auth-route=^/share/` carve-out |
-| `oktogon/router/audit.ts` | Modify | Log share create/revoke/public-view |
+| `gateway/router/audit.ts` | Modify | Log share create/revoke/public-view |
 | `.maestru/docs/02-architecture/03-security-and-origin-model.md` | Modify | Document the single deliberate unauthenticated exception |
 | `.maestru/docs/50-running-in-maestru/05-multi-user.md` | Modify | Document public sharing in the multi-user model |

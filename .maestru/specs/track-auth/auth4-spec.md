@@ -43,8 +43,8 @@ Crucially, `GET /api/mcp/oauth/callback` is **deliberately not loopback-gated**,
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `oktogon/orchestrator/seed-mcp.ts` | Create | Auto-register the Maestru MCP server per instance |
-| `oktogon/router/index.ts` | Modify | Route `/api/mcp/oauth/callback` by `state` → user instance |
+| `gateway/orchestrator/seed-mcp.ts` | Create | Auto-register the Maestru MCP server per instance |
+| `gateway/router/index.ts` | Modify | Route `/api/mcp/oauth/callback` by `state` → user instance |
 | `deploy/maestru-mcp.md` | Create | Box config: allowlist the redirect host (admin coordination) |
 | `.maestru/docs/20-daemon/05-connectors-and-mcp.md` | Modify | Document the per-user MCP OAuth wiring |
 | `.maestru/docs/50-running-in-maestru/05-multi-user.md` | Modify | Document per-user MCP association |

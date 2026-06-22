@@ -22,13 +22,13 @@ Chain after this item:
 maestru.dev → oauth2-proxy(:3000) → ROUTER(:3001) → per-user web sidecar(:30xx) → per-user daemon → shared ~/.claude
 ```
 
-This item owns the **mapping + routing contract + registry**; actual spawn/teardown is AUTH3. Code lives under a new clearly-owned `oktogon/` dir (additive — no Open Design edits).
+This item owns the **mapping + routing contract + registry**; actual spawn/teardown is AUTH3. Code lives under a new clearly-owned `gateway/` dir (additive — no Open Design edits).
 
 ## Implementation
 
 **Phase 1 — Identity → namespace/data-dir.** `namespace = sha256(email).slice(0,12)`; `dataDir = /var/lib/open-design/users/<namespace>` (durable mount, per AUTH5). Deterministic and stable across logins.
 
-**Phase 2 — Router.** A small Node/Express service (`oktogon/router/`) that, per request: reads `X-Forwarded-Email` (trusted only from the auth proxy hop), looks up the user's instance in the registry, and reverse-proxies (HTTP + SSE + WebSocket upgrade) to that instance's web port. Single public host; route by authenticated session (sticky to the user's instance).
+**Phase 2 — Router.** A small Node/Express service (`gateway/router/`) that, per request: reads `X-Forwarded-Email` (trusted only from the auth proxy hop), looks up the user's instance in the registry, and reverse-proxies (HTTP + SSE + WebSocket upgrade) to that instance's web port. Single public host; route by authenticated session (sticky to the user's instance).
 
 **Phase 3 — Registry.** In-memory map persisted to disk: `email → { namespace, dataDir, webPort, daemonPort, pid, lastAccessAt }`. The router reads it; AUTH3's orchestrator writes it on spawn/teardown.
 
@@ -42,8 +42,8 @@ This item owns the **mapping + routing contract + registry**; actual spawn/teard
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `oktogon/router/index.ts` | Create | Identity-aware reverse proxy (HTTP/SSE/WS) |
-| `oktogon/router/registry.ts` | Create | Email → instance registry (persisted) |
-| `oktogon/router/namespace.ts` | Create | Deterministic email → namespace/data-dir |
+| `gateway/router/index.ts` | Create | Identity-aware reverse proxy (HTTP/SSE/WS) |
+| `gateway/router/registry.ts` | Create | Email → instance registry (persisted) |
+| `gateway/router/namespace.ts` | Create | Deterministic email → namespace/data-dir |
 | `scripts/auth-proxy.sh` | Modify | Point oauth2-proxy upstream at the router |
 | `.maestru/docs/50-running-in-maestru/05-multi-user.md` | Create | Document the multi-user routing model |

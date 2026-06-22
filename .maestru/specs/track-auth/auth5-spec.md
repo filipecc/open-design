@@ -31,17 +31,17 @@ maestru.dev proxy → oauth2-proxy(:3000) → router(:3001) → orchestrator →
 
 **Phase 4 — Hardening.** Per-instance daemon stays loopback (the AUTH1 no-bypass invariant applies to *every* per-user instance, not just the gate); the router strips any inbound `X-Forwarded-*` it didn't set; concurrent-instance ceiling + LRU teardown; rate limits. The **public share routes (AUTH6)** are the only unauthenticated surface — verify they expose read-only single artifacts and no `/api` reachability. **Audit log** of logins, runs, and share create/view keyed by `X-Forwarded-Email` for attribution (the shared Claude Code account makes per-user attribution otherwise invisible).
 
-**Phase 5 — Upgrade path.** All custom code lives under `oktogon/` + `scripts/` (additive) → `git merge upstream/main` stays clean (`80-methodology/03-upstream-merge-runbook.md`). Document a rolling restart that drains per-user instances.
+**Phase 5 — Upgrade path.** All custom code lives under `gateway/` + `scripts/` (additive) → `git merge upstream/main` stays clean (`80-methodology/03-upstream-merge-runbook.md`). Document a rolling restart that drains per-user instances.
 
-**Risks / decisions.** Volume sizing per user; cost of N idle instances (idle teardown mitigates); secret rotation; GDPR/retention for stored user MCP tokens + projects; whether to cap to known org emails (allowlist) beyond the `@oktogon.io` domain check.
+**Risks / decisions.** Volume sizing per user; cost of N idle instances (idle teardown mitigates); secret rotation; GDPR/retention for stored user MCP tokens + projects; whether to cap to known org emails (allowlist) beyond the configured domain check.
 
 ## Impacted Files
 
 | File | Action | Purpose |
 |------|--------|---------|
 | `deploy/multiuser/compose.yaml` | Create | Supervise oauth2-proxy + router + orchestrator |
-| `oktogon/orchestrator/lifecycle.ts` | Modify | Resource ceilings, idle teardown, drain-on-upgrade |
-| `oktogon/router/audit.ts` | Create | Per-user login/run audit log (attribution) |
+| `gateway/orchestrator/lifecycle.ts` | Modify | Resource ceilings, idle teardown, drain-on-upgrade |
+| `gateway/router/audit.ts` | Create | Per-user login/run audit log (attribution) |
 | `.env.example` | Modify | Full secret + volume documentation |
 | `.maestru/docs/50-running-in-maestru/04-deployment-options.md` | Modify | Promote to the supervised multi-user deployment |
 | `.maestru/docs/01-product/03-open-questions.md` | Modify | Mark auth + persistence decisions resolved |
