@@ -5,7 +5,7 @@ id: BOK6
 title: 30 Agents and CLIs
 created: 2026-06-22
 priority: medium
-status: backlog
+status: in-progress
 track: track-bok
 ---
 

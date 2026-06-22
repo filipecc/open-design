@@ -5,7 +5,7 @@ id: BOK5
 title: 20 Daemon (apps/daemon)
 created: 2026-06-22
 priority: high
-status: backlog
+status: in-progress
 track: track-bok
 ---
 

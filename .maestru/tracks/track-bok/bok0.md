@@ -5,7 +5,7 @@ id: BOK0
 title: 00 Index and doc conventions
 created: 2026-06-22
 priority: high
-status: backlog
+status: in-progress
 track: track-bok
 ---
 

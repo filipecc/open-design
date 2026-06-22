@@ -5,7 +5,7 @@ id: BOK2
 title: 02 Architecture — system model
 created: 2026-06-22
 priority: high
-status: backlog
+status: in-progress
 track: track-bok
 ---
 

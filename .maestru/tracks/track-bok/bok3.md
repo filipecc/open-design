@@ -5,7 +5,7 @@ id: BOK3
 title: 03 Environment variables surface
 created: 2026-06-22
 priority: high
-status: backlog
+status: in-progress
 track: track-bok
 ---
 

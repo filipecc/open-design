@@ -5,7 +5,7 @@ id: BOK8
 title: 50 Running in Maestru environment
 created: 2026-06-22
 priority: high
-status: backlog
+status: in-progress
 track: track-bok
 ---
 
