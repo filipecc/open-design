@@ -11,6 +11,10 @@ status: active
 
 # track-bok: Open Design Body of Knowledge
 
+Canonical, Maestru-managed documentation of how Open Design works today and the rules for evolving the fork into the **Oktogon Design Partner**. Each work-item below owns one numbered doc section under `.maestru/docs/`, following the maestru-core taxonomy conventions (numbered sections, `00-overview` entry points, `<!-- maestru:summary -->` blocks).
+
+## Summary
+
 <!-- maestru:work-items-list -->
 | ID | Title | Status | Created | Owner | Priority | Completed | Blocked By | Spec |
 |---|---|---|---|---|---|---|---|---|
