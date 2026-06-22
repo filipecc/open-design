@@ -5,8 +5,9 @@ id: BOK0
 title: 00 Index and doc conventions
 created: 2026-06-22
 priority: high
-status: in-progress
+status: done
 track: track-bok
+completed: 2026-06-22
 ---
 
 # BOK0: 00 Index and doc conventions

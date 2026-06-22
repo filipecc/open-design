@@ -18,15 +18,15 @@ Canonical, Maestru-managed documentation of how Open Design works today and the 
 <!-- maestru:work-items-list -->
 | ID | Title | Status | Created | Owner | Priority | Completed | Blocked By | Spec |
 |---|---|---|---|---|---|---|---|---|
-| BOK0 | 00 Index and doc conventions | in-progress | 2026-06-22 |  | high |  |  |  |
-| BOK1 | 01 Product — Oktogon Design Partner vision | in-progress | 2026-06-22 |  | medium |  |  |  |
-| BOK2 | 02 Architecture — system model | in-progress | 2026-06-22 |  | high |  |  |  |
-| BOK3 | 03 Environment variables surface | in-progress | 2026-06-22 |  | high |  |  |  |
-| BOK4 | 10 Web app (apps/web) | in-progress | 2026-06-22 |  | medium |  |  |  |
-| BOK5 | 20 Daemon (apps/daemon) | in-progress | 2026-06-22 |  | high |  |  |  |
-| BOK6 | 30 Agents and CLIs | in-progress | 2026-06-22 |  | medium |  |  |  |
-| BOK7 | 40 Content system (skills, design-systems, templates, plugins) | in-progress | 2026-06-22 |  | medium |  |  |  |
-| BOK8 | 50 Running in Maestru environment | in-progress | 2026-06-22 |  | high |  |  |  |
-| BOK9 | 80 Methodology — rules to evolve | in-progress | 2026-06-22 |  | high |  |  |  |
-| BOK10 | 85 Audits — point-in-time analyses | in-progress | 2026-06-22 |  | low |  |  |  |
+| BOK0 | 00 Index and doc conventions | done | 2026-06-22 |  | high | 2026-06-22 |  |  |
+| BOK1 | 01 Product — Oktogon Design Partner vision | done | 2026-06-22 |  | medium | 2026-06-22 |  |  |
+| BOK2 | 02 Architecture — system model | done | 2026-06-22 |  | high | 2026-06-22 |  |  |
+| BOK3 | 03 Environment variables surface | done | 2026-06-22 |  | high | 2026-06-22 |  |  |
+| BOK4 | 10 Web app (apps/web) | done | 2026-06-22 |  | medium | 2026-06-22 |  |  |
+| BOK5 | 20 Daemon (apps/daemon) | done | 2026-06-22 |  | high | 2026-06-22 |  |  |
+| BOK6 | 30 Agents and CLIs | done | 2026-06-22 |  | medium | 2026-06-22 |  |  |
+| BOK7 | 40 Content system (skills, design-systems, templates, plugins) | done | 2026-06-22 |  | medium | 2026-06-22 |  |  |
+| BOK8 | 50 Running in Maestru environment | done | 2026-06-22 |  | high | 2026-06-22 |  |  |
+| BOK9 | 80 Methodology — rules to evolve | done | 2026-06-22 |  | high | 2026-06-22 |  |  |
+| BOK10 | 85 Audits — point-in-time analyses | done | 2026-06-22 |  | low | 2026-06-22 |  |  |
 <!-- /maestru:work-items-list -->

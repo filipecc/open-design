@@ -5,8 +5,9 @@ id: BOK10
 title: 85 Audits — point-in-time analyses
 created: 2026-06-22
 priority: low
-status: in-progress
+status: done
 track: track-bok
+completed: 2026-06-22
 ---
 
 # BOK10: 85 Audits — point-in-time analyses
