@@ -33,6 +33,8 @@ Security stance: opt-in per artifact, revocable, no enumeration, read-only, no `
 
 **Risks / decisions.** Reaching into a running per-user instance to serve one artifact (vs. copying it to a public bucket — alternative to evaluate); ensuring no auth/`/api` reachability through the share path; token leakage = that one artifact only (acceptable, revocable); whether share survives the owner's instance being idle-torn-down (router may need to spin it up read-only, or serve from a cached copy).
 
+**Validated (spike F, 2026-06-22):** prototype `/share/<token>` resolver served the real artifact (the "Cadence" deck, 21663 bytes) on a valid token, and correctly returned **404 on unknown token** (no leak), **404 on `/api`** (not a share route), **404 on path traversal**, and **405 on POST** (read-only). The security model holds; remaining work is the router resolving the token into the right per-user instance (Phase 3).
+
 ## Impacted Files
 
 | File | Action | Purpose |

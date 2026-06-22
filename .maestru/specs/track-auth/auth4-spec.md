@@ -31,7 +31,9 @@ Let each authenticated user connect to **any standards-compliant MCP server** th
 
 **Phase 2 — Per-user authorize (generic).** Connect → `POST /api/mcp/oauth/start` → daemon does discovery + DCR + builds the PKCE S256 authorize URL → user's browser → that server's login/consent → redirect to `/api/mcp/oauth/callback` → token exchange → stored in the user's `mcp-tokens.json`.
 
-**Phase 3 — Callback routing through the proxy.** The router maps `/api/mcp/oauth/callback?state=…` back to the **originating user's instance** (state-keyed). Confirm the daemon's DCR redirect URI uses the **public host** (`https://$PUBLIC_HOST/api/mcp/oauth/callback`), not loopback. Generic requirement: whatever MCP server the user connects must permit that redirect URI under its own client-registration/allowlist policy (for DCR-capable servers this is typically automatic; for stricter servers, the server operator allowlists it — a per-server, deploy-time concern, not in the repo).
+**Phase 3 — Callback routing through the proxy.** The router maps `/api/mcp/oauth/callback?state=…` back to the **originating user's instance** (state-keyed). The daemon's public callback is pinned by **`OD_PUBLIC_BASE_URL`** (`mcp-routes.ts:359-368` `getPublicBaseUrl` → `mcpOAuthCallbackUrl`); set it per instance to `https://$PUBLIC_HOST` so the redirect URI is `https://$PUBLIC_HOST/api/mcp/oauth/callback` (not loopback). Generic requirement: the MCP server must permit that redirect URI (DCR-capable servers typically auto-accept; stricter servers allowlist it — deploy-time, per-server).
+
+**Validated (E prep, 2026-06-22):** against the live test server — dynamic client registration with our public redirect URI returned **201** (redirect allowlist not a blocker for that box); with `OD_PUBLIC_BASE_URL` set, `POST /api/mcp/oauth/start` produced a complete authorize URL with a **public callback**, the daemon's own registered `client_id`, **PKCE S256**, scopes `mcp:read mcp:write offline_access`, and RFC 8707 `resource`. The entire machine-to-machine path works; only the browser consent click remains (E full).
 
 **Phase 4 — Injection.** On each spawn, `buildClaudeMcpJson` writes the user's Bearer token into `<cwd>/.mcp.json`, so Claude Code calls that server's `/mcp` as the user.
 
@@ -53,7 +55,7 @@ Let each authenticated user connect to **any standards-compliant MCP server** th
 | File | Action | Purpose |
 |------|--------|---------|
 | `gateway/router/index.ts` | Modify | Route `/api/mcp/oauth/callback` by `state` → user instance |
-| `gateway/orchestrator/seed-mcp.ts` | Create | (Optional) seed default MCP server config per instance from deploy config |
+| `gateway/orchestrator/seed-mcp.ts` | Create | (Optional) seed default MCP server config per instance + set `OD_PUBLIC_BASE_URL` for the public callback |
 | `deploy/mcp-servers.example` | Create | Deploy-time MCP server origin(s) + per-server redirect-allowlist notes (no values committed) |
 | `apps/daemon/src/mcp-oauth.ts` | None (verified) | Spike D1 confirmed rotated-token write-back (`server.ts:902/917/5361`) — no change |
 | `.maestru/docs/20-daemon/05-connectors-and-mcp.md` | Modify | Document per-user MCP OAuth + refresh wiring |
