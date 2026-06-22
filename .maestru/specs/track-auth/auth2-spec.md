@@ -34,6 +34,8 @@ This item owns the **mapping + routing contract + registry**; actual spawn/teard
 
 **Phase 4 — Wire into AUTH1.** Point oauth2-proxy `--upstream` at the router (`:3001`) instead of a single web sidecar. On a cache miss (no running instance), the router calls the orchestrator (AUTH3) to spawn one, waits for ready, then proxies — so the user never sees the plumbing.
 
+**Phase 5 — Public-share path (AUTH6 hook).** The router must match the unauthenticated **`/share/<token>`** family *before* identity-based routing and resolve it via the AUTH6 token store (no session, read-only, one artifact). All other paths require the `X-Forwarded-Email` from the auth hop. Design the router so the share branch and the authenticated branch are cleanly separated.
+
 **Risks / decisions.** Session stickiness (one user → one instance); `X-Forwarded-Email` must be unspoofable (only the auth-proxy hop may set it — strip any inbound copy at the router edge); cold-start latency on first request (handled by AUTH3 readiness wait); per-instance daemon stays loopback.
 
 ## Impacted Files

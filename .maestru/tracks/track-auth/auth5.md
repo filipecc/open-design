@@ -7,7 +7,7 @@ created: 2026-06-22
 priority: medium
 status: backlog
 track: track-auth
-blocked-by: [AUTH4]
+blocked-by: [AUTH4, AUTH6]
 specs: [auth5-spec]
 ---
 

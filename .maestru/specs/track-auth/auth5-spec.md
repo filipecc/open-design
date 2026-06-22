@@ -29,7 +29,7 @@ maestru.dev proxy → oauth2-proxy(:3000) → router(:3001) → orchestrator →
 
 **Phase 3 — Supervision.** Compose (or systemd) for oauth2-proxy + router + orchestrator as long-lived services; the maestru.dev proxy still targets `:3000`. Health checks + restart policy.
 
-**Phase 4 — Hardening.** Per-instance daemon stays loopback; the router strips any inbound `X-Forwarded-*` it didn't set; concurrent-instance ceiling + LRU teardown; rate limits. **Audit log** of logins and runs keyed by `X-Forwarded-Email` for attribution (the shared Claude Code account makes per-user attribution otherwise invisible).
+**Phase 4 — Hardening.** Per-instance daemon stays loopback (the AUTH1 no-bypass invariant applies to *every* per-user instance, not just the gate); the router strips any inbound `X-Forwarded-*` it didn't set; concurrent-instance ceiling + LRU teardown; rate limits. The **public share routes (AUTH6)** are the only unauthenticated surface — verify they expose read-only single artifacts and no `/api` reachability. **Audit log** of logins, runs, and share create/view keyed by `X-Forwarded-Email` for attribution (the shared Claude Code account makes per-user attribution otherwise invisible).
 
 **Phase 5 — Upgrade path.** All custom code lives under `oktogon/` + `scripts/` (additive) → `git merge upstream/main` stays clean (`80-methodology/03-upstream-merge-runbook.md`). Document a rolling restart that drains per-user instances.
 
