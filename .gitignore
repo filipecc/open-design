@@ -90,3 +90,6 @@ growth/**
 
 # local pnpm store
 .pnpm-store/
+
+# local secrets (AUTH1)
+.env

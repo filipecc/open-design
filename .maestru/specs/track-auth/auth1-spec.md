@@ -75,8 +75,10 @@ Delivers **model A** (shared workspace, per-user login) and exposes the authenti
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `scripts/dev-web.sh` | Modify | Launch web sidecar on internal port 3001 |
-| `scripts/auth-proxy.sh` | Create | Launch oauth2-proxy on :3000 → :3001 (all config from env) |
-| `deploy/oauth2-proxy.cfg` | Create | oauth2-proxy config via env interpolation; `skip-auth-route` for AUTH6 |
-| `.env.example` | Create | Env keys + placeholders: `OAUTH2_PROXY_*`, `PUBLIC_HOST` (no real values) |
+| `scripts/auth-proxy.sh` | ✅ Scaffolded | Env-driven oauth2-proxy launcher on :3000 → :3001; `--skip-auth-route=^/share/` (AUTH6); `/oauth2/*` open |
+| `.env.example` | ✅ Scaffolded | Env keys + placeholders: `OAUTH2_PROXY_*`, `PUBLIC_HOST` (no real values) |
+| `.env.local` | (gitignored) | Real deploy values live here; never committed |
+| `scripts/dev-web.sh` | Modify (later) | Add internal-port mode (web on `127.0.0.1:3001`) when wiring AUTH1 live |
 | `.maestru/docs/02-architecture/03-security-and-origin-model.md` | Modify | Document the front-door layer + the no-bypass invariant |
+
+> Scaffold status (2026-06-22): `scripts/auth-proxy.sh` + `.env.example` created (config from env, no `.cfg` file needed). `.env.local` holds the real `PUBLIC_HOST`, domain, client ID, and a generated cookie secret; the **Google client secret** is the only blank. oauth2-proxy isn't installed in the dev container — install at deploy. No live wiring yet (web still on :3000 via `dev-web.sh`).
