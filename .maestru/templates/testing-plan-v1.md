@@ -37,5 +37,12 @@ created: {{created}}
 
 ## Impacted Files
 
+<!-- Guidelines:
+- One row per file, no duplicates
+- Action column: Create, Modify, Delete
+- Purpose column: brief explanation of the test change
+- Order by phase/dependency, not alphabetically
+-->
+
 | File | Action | Purpose |
 |------|--------|---------|

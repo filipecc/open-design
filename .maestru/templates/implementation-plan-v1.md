@@ -13,13 +13,26 @@ created: {{created}}
 
 ## Overview
 
-<!-- What this feature adds and why it's needed -->
+<!-- Guidelines:
+- What this feature adds and why it's needed
+- Context or background needed to understand the change
+-->
 
 ## Implementation
 
-<!-- Steps, phases, and code changes -->
+<!-- Guidelines:
+- Steps, phases, and code changes
+- Order by dependency; call out anything risky or non-obvious
+-->
 
 ## Impacted Files
+
+<!-- Guidelines:
+- One row per file, no duplicates
+- Action column: Create, Modify, Delete
+- Purpose column: brief explanation of the change
+- Order by phase/dependency, not alphabetically
+-->
 
 | File | Action | Purpose |
 |------|--------|---------|

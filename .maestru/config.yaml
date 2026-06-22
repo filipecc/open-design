@@ -1,3 +1,14 @@
 maestru: "0.4"
 
 allowedAuthors: [developer]
+
+templates:
+  work-spec:
+    enforced: false
+    list:
+      - diagrams-v1
+      - implementation-plan-v1
+      - implementation-plan-v2
+      - research-v1
+      - testing-plan-v1
+      - wireframes-v1
