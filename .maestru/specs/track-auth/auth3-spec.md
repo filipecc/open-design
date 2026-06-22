@@ -27,11 +27,13 @@ No Open Design code changes — pure orchestration around `tools-dev`. Lives in 
 
 **Phase 4 — Shared Claude Code.** Confirm `HOME` unchanged so all instances read the same `~/.claude` org credential; do **not** set per-user agent homes. (Per-user *data* isolated; per-user *agent account* shared — exactly the requirement.)
 
-**Phase 5 — Resource ceilings.** Cap concurrent instances; LRU teardown of the least-recently-used when over the cap; optional warm pool to cut cold-start latency. Each instance is ~1 daemon + 1 Next.js process.
+**Phase 5 — Resource ceilings & cold-start.** Cap concurrent instances; LRU teardown of the least-recently-used when over the cap. Each instance is ~1 daemon + 1 Next.js process. **Cold-start (spike C): run per-user instances as a PRODUCTION build** (`tools-dev --prod`, after `pnpm --filter @open-design/web build`) so first-page is ~daemon-ready (~4s) rather than the ~16s dev-mode on-demand compile; keep a small **warm pool** of pre-spawned instances to hide even that. A dev-mode multi-user deployment would *require* a warm pool.
 
 **Risks / decisions.** Spawn latency (mitigate with warm pool / readiness wait); memory (N Node pairs → cap + LRU); port exhaustion (assign from pool + registry); sqlite is per-dir so no lock contention; ensure idempotent spawn (one instance per namespace).
 
 **Validated (spike B, 2026-06-22):** two instances launched concurrently with separate `OD_DATA_DIR`+`--namespace` ran cleanly — distinct web+daemon ports, **separate `app.sqlite` (distinct inodes)** + `projects/` dirs, separate IPC sockets (`/tmp/open-design/ipc/<ns>/`), **shared `~/.claude`** (HOME never overridden), and each daemon answered `/api` with independent state. Model B confirmed feasible. Open item it surfaced: explicit web-port assignment (folded into Phase 1).
+
+**Measured (spike C, 2026-06-22):** cold instance → daemon/server "ready" in **~4.0–4.3s**; first served page in **~16–17s in dev mode** (Next on-demand route compile ~12–13s; warm `.next` did not remove it). → use a **production build** for per-user instances (~4s cold) and/or a warm pool; see Phase 5.
 
 ## Impacted Files
 

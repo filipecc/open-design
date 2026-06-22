@@ -27,7 +27,7 @@ hosting proxy → oauth2-proxy(:3000) → router(:3001) → orchestrator → per
 
 **Phase 2 — Secrets.** Google `client_secret`, oauth2-proxy `cookie-secret`, and any MCP client credentials via env/secret store (not git). `.env.example` documents the required set; real values injected at deploy.
 
-**Phase 3 — Supervision.** Compose (or systemd) for oauth2-proxy + router + orchestrator as long-lived services; the hosting proxy still targets `:3000` (whatever public host fronts the deployment). Health checks + restart policy.
+**Phase 3 — Supervision.** Compose (or systemd) for oauth2-proxy + router + orchestrator as long-lived services; the hosting proxy still targets `:3000` (whatever public host fronts the deployment). Health checks + restart policy. Per-user instances run a **production web build** (`pnpm --filter @open-design/web build`, then `tools-dev --prod`) — spike C showed dev mode adds ~12–13s of on-demand compile to cold-start, which prod removes.
 
 **Phase 4 — Hardening.** Per-instance daemon stays loopback (the AUTH1 no-bypass invariant applies to *every* per-user instance, not just the gate); the router strips any inbound `X-Forwarded-*` it didn't set; concurrent-instance ceiling + LRU teardown; rate limits. The **public share routes (AUTH6)** are the only unauthenticated surface — verify they expose read-only single artifacts and no `/api` reachability. **Audit log** of logins, runs, and share create/view keyed by `X-Forwarded-Email` for attribution (the shared Claude Code account makes per-user attribution otherwise invisible).
 
