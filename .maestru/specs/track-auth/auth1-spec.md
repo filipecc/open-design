@@ -69,6 +69,8 @@ Delivers **model A** (shared workspace, per-user login) and exposes the authenti
 
 **Risks / decisions.** Secrets via env only; SSE buffering (`--flush-interval`); TLS terminates at the hosting proxy, oauth2-proxy runs HTTP internally; the no-bypass invariant depends on the sidecar/daemon staying internal (applies to each per-user instance in AUTH3/AUTH5 too).
 
+**Validated (spike A, 2026-06-22):** ran a front proxy on `:3000` → web sidecar on internal `127.0.0.1:3001` → daemon. The **full public chain** (hosting proxy → `:3000` proxy → `:3001` sidecar → daemon) returned **200** for the page, `/api/app-config`, and `/api/projects` (real data) with the public `Origin` — **origin trust intact through the extra hop**. Sidecar + daemon bound `127.0.0.1` only → **no-bypass confirmed**. (A pipe-based proxy streamed fine; oauth2-proxy will need `--flush-interval` for SSE, already in Phase 2.) This is exactly oauth2-proxy's position minus the Google gate.
+
 ## Impacted Files
 
 | File | Action | Purpose |

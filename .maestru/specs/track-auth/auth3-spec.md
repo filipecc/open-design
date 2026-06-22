@@ -19,7 +19,7 @@ No Open Design code changes — pure orchestration around `tools-dev`. Lives in 
 
 ## Implementation
 
-**Phase 1 — Spawn.** On first request for a user (router cache miss), launch `OD_DATA_DIR=<dir> OD_HOST=127.0.0.1 OD_ALLOWED_ORIGINS=https://<public-host> tools-dev run web --namespace <ns> --web-port 0`. Capture the allocated web + daemon ports from the tools-dev status snapshot / IPC (`/tmp/open-design/ipc/<ns>/`).
+**Phase 1 — Spawn.** On first request for a user (router cache miss), launch `OD_DATA_DIR=<dir> OD_HOST=127.0.0.1 OD_ALLOWED_ORIGINS=https://<public-host> tools-dev run web --namespace <ns> --web-port <assigned>`. The orchestrator **assigns** the web port from a pool (`--web-port 0` is rejected by tools-dev — see spike B); the **daemon port auto-allocates**. Capture the daemon port from the tools-dev status / IPC (`/tmp/open-design/ipc/<ns>/`). Note: when `OD_DATA_DIR` is set, the data dir **is** that path (not `<path>/.od`).
 
 **Phase 2 — Readiness.** Wait for "dev server ready" / a health probe on the web port before the router proxies to it (avoids 502s on cold start).
 
@@ -29,7 +29,9 @@ No Open Design code changes — pure orchestration around `tools-dev`. Lives in 
 
 **Phase 5 — Resource ceilings.** Cap concurrent instances; LRU teardown of the least-recently-used when over the cap; optional warm pool to cut cold-start latency. Each instance is ~1 daemon + 1 Next.js process.
 
-**Risks / decisions.** Spawn latency (mitigate with warm pool / readiness wait); memory (N Node pairs → cap + LRU); port exhaustion (auto-alloc + registry); sqlite is per-dir so no lock contention; ensure idempotent spawn (one instance per namespace).
+**Risks / decisions.** Spawn latency (mitigate with warm pool / readiness wait); memory (N Node pairs → cap + LRU); port exhaustion (assign from pool + registry); sqlite is per-dir so no lock contention; ensure idempotent spawn (one instance per namespace).
+
+**Validated (spike B, 2026-06-22):** two instances launched concurrently with separate `OD_DATA_DIR`+`--namespace` ran cleanly — distinct web+daemon ports, **separate `app.sqlite` (distinct inodes)** + `projects/` dirs, separate IPC sockets (`/tmp/open-design/ipc/<ns>/`), **shared `~/.claude`** (HOME never overridden), and each daemon answered `/api` with independent state. Model B confirmed feasible. Open item it surfaced: explicit web-port assignment (folded into Phase 1).
 
 ## Impacted Files
 

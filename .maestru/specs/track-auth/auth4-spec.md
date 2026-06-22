@@ -38,13 +38,15 @@ Let each authenticated user connect to **any standards-compliant MCP server** th
 **Phase 5 — Token refresh, rotation & expiry.** Standards-based, server-agnostic:
 - Request `offline_access` (or the server's equivalent) so a **refresh token** is issued — precondition for any refresh.
 - The daemon refreshes on spawn when the access token is expired, using the persisted `refreshToken`/`tokenEndpoint`/`clientId`/`clientSecret`.
-- **MUST-VERIFY:** OAuth servers **may rotate** the refresh token on each use (RFC 6749 §6 allows it; some servers revoke the whole chain if a rotated token is reused). Confirm the daemon **persists the rotated `refreshToken` back** to `mcp-tokens.json` after each refresh — otherwise the 2nd refresh fails and the user is silently disconnected. If it doesn't, that's the one small Open Design change AUTH4 needs.
+- **VERIFIED (spike D1, 2026-06-22):** OAuth servers may rotate the refresh token on each use (RFC 6749 §6). The daemon **already persists the rotated token correctly** — `server.ts:902` `refreshToken: tokenResp.refresh_token ?? current.refreshToken` (takes the new one, falls back to old for non-rotating servers), persisted via `setToken()` (`server.ts:917`), triggered on spawn (`server.ts:5361`). **No Open Design change needed.**
 - **No concurrent refresh** on the same token (rely on the per-`dataDir` mutex; per-user daemons make cross-instance races impossible).
 - **Expiry UX:** access-token refresh is silent; when the **refresh token itself** expires or a refresh fails (`401 + WWW-Authenticate`), surface a clear **"Reconnect"** prompt to the user and re-run the authorize flow. Define behavior for mid-run expiry and the AUTH3 idle-teardown gap (token persists under the durable per-user `OD_DATA_DIR` from AUTH5; on next spawn, refresh-on-spawn applies).
 
 **Phase 6 — Scopes, disconnect, lifecycle.** Request the scopes the server advertises (read/write + offline_access). Support disconnect/revoke (`POST /api/mcp/oauth/disconnect`). Optionally use per-run scoped tokens if a server offers them.
 
-**Risks / decisions.** The connected server's redirect-URI/client-registration policy must permit our callback (server-dependent, deploy-time). Router must state-key the callback to the right user instance. **Verify rotated-refresh-token write-back before relying on "built-in" refresh** — this is the one genuine code-risk in AUTH4.
+**Risks / decisions.** The connected server's redirect-URI/client-registration policy must permit our callback (server-dependent, deploy-time). Router must state-key the callback to the right user instance. ~~Verify rotated-refresh-token write-back~~ **RESOLVED (spike D1)** — write-back confirmed in the daemon. The remaining work is the callback routing through the proxy + the per-server redirect allowlist (both deploy-time/router, not Open Design code).
+
+**Validated (spike E-protocol, 2026-06-22):** probed a live OAuth/PKCE MCP server end-to-end at the protocol layer — `/mcp` returns `401` + `www-authenticate` → RFC 9728 resource metadata → RFC 8414 auth-server metadata advertising `/oauth/{authorize,token,register,revoke}`, `code_challenge_methods_supported:[S256]`, `grant_types:[authorization_code,refresh_token]`, `token_endpoint_auth_methods:[none]` (public client), scopes `mcp:read mcp:write offline_access`. Exactly what the daemon's MCP client expects — discovery/registration/PKCE/refresh all compatible. Only the browser-consent step remains (spike E full).
 
 ## Impacted Files
 
@@ -53,6 +55,6 @@ Let each authenticated user connect to **any standards-compliant MCP server** th
 | `gateway/router/index.ts` | Modify | Route `/api/mcp/oauth/callback` by `state` → user instance |
 | `gateway/orchestrator/seed-mcp.ts` | Create | (Optional) seed default MCP server config per instance from deploy config |
 | `deploy/mcp-servers.example` | Create | Deploy-time MCP server origin(s) + per-server redirect-allowlist notes (no values committed) |
-| `apps/daemon/src/mcp-oauth.ts` | Verify (only) | Confirm rotated refresh token is persisted; patch only if it isn't |
+| `apps/daemon/src/mcp-oauth.ts` | None (verified) | Spike D1 confirmed rotated-token write-back (`server.ts:902/917/5361`) — no change |
 | `.maestru/docs/20-daemon/05-connectors-and-mcp.md` | Modify | Document per-user MCP OAuth + refresh wiring |
 | `.maestru/docs/50-running-in-maestru/05-multi-user.md` | Modify | Document per-user MCP connections |
