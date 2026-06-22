@@ -12,7 +12,7 @@ updated: 2026-06-22
 # Data Dir & Storage
 
 <!-- maestru:summary -->
-On startup server.ts computes RUNTIME_DATA_DIR = resolveDataDir(process.env.OD_DATA_DIR, PROJECT_ROOT) (~line 772). resolveDataDir (daemon-paths.ts ~125-163) returns OD_DATA_DIR resolved against the project root, or defaults to <projectRoot>/.od; it creates the dir, write-tests it, and throws an actionable error on permission problems. Every daemon-owned path derives from RUNTIME_DATA_DIR per the AGENTS.md "Daemon data directory contract": PROJECTS_DIR (managed projects), ARTIFACTS_DIR (renders), CRITIQUE_ARTIFACTS_DIR, USER_SKILLS_DIR, USER_DESIGN_SYSTEMS_DIR, PLUGIN_LOCKFILE_PATH/PLUGIN_REGISTRY_ROOTS, plus connector credential and Composio config stores (FileConnectorCredentialStore/configureComposioConfigStore, ~3399-3402). SQLite is opened at server.ts ~3386 via openDatabase(PROJECT_ROOT,{dataDir:RUNTIME_DATA_DIR}) using better-sqlite3, storing projects/conversations/messages/deployments/routines/templates/preview-comments/agent-sessions at <RUNTIME_DATA_DIR>/app.sqlite (+WAL). The legacy-data-migrator (one-shot, OD_LEGACY_DATA_DIR, called ~796) copies 0.3.x .od payloads into the new root, idempotent via a .migrated-from marker. Runtime data stays out of git.
+On startup server.ts computes RUNTIME_DATA_DIR = resolveDataDir(process.env.OD_DATA_DIR, PROJECT_ROOT) (~line 772). resolveDataDir (daemon-paths.ts ~125-163) returns OD_DATA_DIR resolved against the project root, or defaults to <projectRoot>/.od; it creates the dir, write-tests it, and throws an actionable error on permission problems. Every daemon-owned path derives from RUNTIME_DATA_DIR per the AGENTS.md "Daemon data directory contract": PROJECTS_DIR (managed projects), ARTIFACTS_DIR (renders), CRITIQUE_ARTIFACTS_DIR, USER_SKILLS_DIR, USER_DESIGN_SYSTEMS_DIR, PLUGIN_LOCKFILE_PATH/PLUGIN_REGISTRY_ROOTS, plus connector credential and Composio config stores (FileConnectorCredentialStore/configureComposioConfigStore, ~3399-3402). Concretely (observed at /app/.od): each project is a real folder projects/<uuid>/ holding the generated artifact (index.html + index.html.artifact.json) and a copied .od-skills/<skill>/; per-run agent event streams are runs/<uuid>/events.jsonl; sibling dirs include artifacts/, critique-artifacts/, connectors/ (mode 0700), and the imported-content dirs, plus app-config.json and installation.json. SQLite is opened at server.ts ~3386 via openDatabase(PROJECT_ROOT,{dataDir:RUNTIME_DATA_DIR}) using better-sqlite3, storing the CATALOG — projects/conversations/messages/deployments/routines/templates/preview-comments/agent-sessions — at <RUNTIME_DATA_DIR>/app.sqlite (+WAL); the project CONTENT lives as files under projects/<uuid>/. The legacy-data-migrator (one-shot, OD_LEGACY_DATA_DIR, called ~796) copies 0.3.x .od payloads into the new root, idempotent via a .migrated-from marker. Runtime data stays out of git.
 <!-- /maestru:summary -->
 
 ## Resolution
@@ -39,9 +39,41 @@ Per the top-level `AGENTS.md` **"Daemon data directory contract"**, every daemon
 
 > Don't improvise path conventions elsewhere — link to the `AGENTS.md` contract.
 
-## SQLite
+## Observed layout (`/app/.od`)
+
+What the default data dir actually contains at runtime:
+
+```
+/app/.od/
+├── app.sqlite (+ -wal/-shm)   the catalog
+├── app-config.json            persisted prefs (agentId, designSystemId, onboarding…)
+├── installation.json          installation id
+├── projects/<uuid>/           one folder per project (the content)
+├── runs/<uuid>/events.jsonl   per-run agent event stream
+├── artifacts/                 rendered/exported outputs
+├── critique-artifacts/        critique outputs
+├── connectors/                connector credentials (mode 0700)
+└── skills/ design-systems/ design-templates/ plugins/   user-imported content
+```
+
+### A project on disk
+
+A project is a **real folder of real files**, not a DB blob:
+
+```
+projects/8a41f1fe-…/
+├── index.html                 the actual creation (deck/page/prototype)
+├── index.html.artifact.json   its metadata
+└── .od-skills/<skill>/         the skill copied into the project
+```
+
+Exports (PDF/PPTX/ZIP) are rendered from these files.
+
+## SQLite — the catalog
 
 Opened at `server.ts` ~3386: `openDatabase(PROJECT_ROOT, { dataDir: RUNTIME_DATA_DIR })` (better-sqlite3). Stores projects, conversations, messages, deployments, routines, templates, preview comments, agent sessions at `<RUNTIME_DATA_DIR>/app.sqlite` (+ WAL).
+
+> **Content vs. catalog:** the files under `projects/<uuid>/` hold the *content*; `app.sqlite` holds the *records* that catalog them. Both are needed to reconstruct a project.
 
 ## Legacy migration
 
