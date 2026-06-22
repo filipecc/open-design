@@ -30,13 +30,12 @@ UPSTREAM="${OAUTH2_PROXY_UPSTREAM:-http://127.0.0.1:3001}"
 
 echo "[auth-proxy] :3000  Google SSO (domain=$OAUTH2_PROXY_EMAIL_DOMAINS)  ->  $UPSTREAM"
 
+# Secrets are passed via ENV (oauth2-proxy auto-reads OAUTH2_PROXY_* names), NOT argv,
+# so they never appear in `ps`/process listings. They were exported above from .env.local:
+#   OAUTH2_PROXY_CLIENT_ID, OAUTH2_PROXY_CLIENT_SECRET, OAUTH2_PROXY_COOKIE_SECRET, OAUTH2_PROXY_EMAIL_DOMAINS
+export OAUTH2_PROXY_REDIRECT_URL="https://$PUBLIC_HOST/oauth2/callback"
 exec oauth2-proxy \
   --provider=google \
-  --email-domain="$OAUTH2_PROXY_EMAIL_DOMAINS" \
-  --client-id="$OAUTH2_PROXY_CLIENT_ID" \
-  --client-secret="$OAUTH2_PROXY_CLIENT_SECRET" \
-  --cookie-secret="$OAUTH2_PROXY_COOKIE_SECRET" \
-  --redirect-url="https://$PUBLIC_HOST/oauth2/callback" \
   --upstream="$UPSTREAM" \
   --http-address="0.0.0.0:3000" \
   --reverse-proxy=true \
