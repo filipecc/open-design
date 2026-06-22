@@ -84,3 +84,9 @@ growth/**
 
 # Agent long-running task memory
 .task/
+
+# Maestru build cache (layered on top of Open Design)
+.maestru/.cache/
+
+# local pnpm store
+.pnpm-store/

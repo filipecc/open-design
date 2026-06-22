@@ -1,0 +1,9 @@
+# maestru.yaml - Maestru project configuration
+
+# Uncomment and configure when you add a dev server:
+# processes:
+#   setup:
+#     command: npm install
+#   run:
+#     command: npm run dev
+#     port: 3000
