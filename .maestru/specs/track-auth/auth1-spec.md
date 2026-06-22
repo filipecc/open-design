@@ -22,11 +22,11 @@ maestru.dev proxy → :3000 oauth2-proxy (Google OAuth, --email-domain=oktogon.i
 
 Delivers **model A** (shared workspace, per-user login) and exposes the authenticated identity as `X-Forwarded-Email`/`X-Forwarded-User`, which **AUTH2** consumes to route each user to their own instance. Claude Code stays the shared org account.
 
-**Decision gate (do first):** confirm whether the Maestru hosting proxy *already* authenticates org users and can forward an identity header. If yes, we may skip oauth2-proxy and trust that header. This spec assumes we own the login via oauth2-proxy.
+**Decision gate — RESOLVED (2026-06-22):** a header-capture probe confirmed the Maestru proxy is a **plain reverse proxy** — it forwards only `x-forwarded-for/host/proto`, **no identity header and no cookie**, even on an authenticated top-level navigation. So there is no Maestru identity to ride: **AUTH1 owns the login via oauth2-proxy + Google.** (Implication: the public URL is currently unauthenticated to anyone with the link — AUTH1 is also the access-control fix, not just identity.)
 
 ## Implementation
 
-**Phase 0 — Identity-source decision.** Run the header-capture probe (temporary echo server on :3000, user loads the URL once) to see what the maestru.dev proxy forwards for an authenticated session. Choose: (a) ride Maestru proxy identity header, or (b) own login via oauth2-proxy (default).
+**Phase 0 — Identity-source decision. ✅ DONE.** Header-capture probe run 2026-06-22: the maestru.dev proxy forwards no identity header/cookie → option (b), own login via oauth2-proxy. No further investigation needed.
 
 **Phase 1 — Google OAuth client** (org task — only the user can create it). Google Cloud Console → Credentials → OAuth client ID (Web application); redirect URI `https://opendesign.<id>.maestru.dev/oauth2/callback`; capture `client_id` + `client_secret` as env/secret, never committed.
 
