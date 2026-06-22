@@ -1,0 +1,47 @@
+---
+maestru: "0.4"
+type: work-spec
+id: auth5-spec
+title: "AUTH5 — Deployment, Secrets & Hardening"
+template: implementation-plan-v1
+work-item: track-auth/AUTH5
+owner: developer
+created: 2026-06-22
+---
+
+# AUTH5 — Deployment, Secrets & Hardening
+
+## Overview
+
+Productionize the multi-user stack: durable per-user data, real secrets handling, a supervised process chain, resource limits, audit/attribution, and a clean upgrade path that keeps absorbing upstream. This closes the persistence and access-control open questions in `01-product/03-open-questions.md`.
+
+Target topology (unchanged maestru.dev proxy in front):
+```
+maestru.dev proxy → oauth2-proxy(:3000) → router(:3001) → orchestrator → per-user {web, daemon}  → shared ~/.claude
+                                                                              └ /var/lib/open-design/users/<ns>/ (durable)
+```
+
+## Implementation
+
+**Phase 1 — Persistence.** Per-user `OD_DATA_DIR` on a durable volume (`/var/lib/open-design/users/<namespace>`), so projects/MCP tokens survive restarts — resolves the "ephemeral `.od`" gap. Backups of that tree.
+
+**Phase 2 — Secrets.** Google `client_secret`, oauth2-proxy `cookie-secret`, and any MCP client credentials via env/secret store (not git). `.env.example` documents the required set; real values injected at deploy.
+
+**Phase 3 — Supervision.** Compose (or systemd) for oauth2-proxy + router + orchestrator as long-lived services; the maestru.dev proxy still targets `:3000`. Health checks + restart policy.
+
+**Phase 4 — Hardening.** Per-instance daemon stays loopback; the router strips any inbound `X-Forwarded-*` it didn't set; concurrent-instance ceiling + LRU teardown; rate limits. **Audit log** of logins and runs keyed by `X-Forwarded-Email` for attribution (the shared Claude Code account makes per-user attribution otherwise invisible).
+
+**Phase 5 — Upgrade path.** All custom code lives under `oktogon/` + `scripts/` (additive) → `git merge upstream/main` stays clean (`80-methodology/03-upstream-merge-runbook.md`). Document a rolling restart that drains per-user instances.
+
+**Risks / decisions.** Volume sizing per user; cost of N idle instances (idle teardown mitigates); secret rotation; GDPR/retention for stored user MCP tokens + projects; whether to cap to known org emails (allowlist) beyond the `@oktogon.io` domain check.
+
+## Impacted Files
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `deploy/multiuser/compose.yaml` | Create | Supervise oauth2-proxy + router + orchestrator |
+| `oktogon/orchestrator/lifecycle.ts` | Modify | Resource ceilings, idle teardown, drain-on-upgrade |
+| `oktogon/router/audit.ts` | Create | Per-user login/run audit log (attribution) |
+| `.env.example` | Modify | Full secret + volume documentation |
+| `.maestru/docs/50-running-in-maestru/04-deployment-options.md` | Modify | Promote to the supervised multi-user deployment |
+| `.maestru/docs/01-product/03-open-questions.md` | Modify | Mark auth + persistence decisions resolved |

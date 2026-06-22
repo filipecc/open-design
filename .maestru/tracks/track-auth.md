@@ -21,6 +21,6 @@ Per-user front-door authentication with a shared organization Claude Code accoun
 | AUTH1 | Front-door authentication gate (oauth2-proxy + Google, @oktogon.io) | backlog | 2026-06-22 |  | critical |  |  | [AUTH1](../specs/track-auth/auth1-spec.md) |
 | AUTH2 | Per-user instance router + namespace/data-dir mapping | backlog | 2026-06-22 |  | high |  | AUTH1 | [AUTH2](../specs/track-auth/auth2-spec.md) |
 | AUTH3 | Per-user daemon lifecycle & orchestration (shared Claude Code) | backlog | 2026-06-22 |  | high |  | AUTH2 | [AUTH3](../specs/track-auth/auth3-spec.md) |
-| AUTH4 | Per-user MCP OAuth/PKCE with the Maestru MCP server | backlog | 2026-06-22 |  | high |  | AUTH3 |  |
-| AUTH5 | Deployment, secrets & hardening | backlog | 2026-06-22 |  | medium |  | AUTH4 |  |
+| AUTH4 | Per-user MCP OAuth/PKCE with the Maestru MCP server | backlog | 2026-06-22 |  | high |  | AUTH3 | [AUTH4](../specs/track-auth/auth4-spec.md) |
+| AUTH5 | Deployment, secrets & hardening | backlog | 2026-06-22 |  | medium |  | AUTH4 | [AUTH5](../specs/track-auth/auth5-spec.md) |
 <!-- /maestru:work-items-list -->

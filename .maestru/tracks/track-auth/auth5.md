@@ -8,6 +8,7 @@ priority: medium
 status: backlog
 track: track-auth
 blocked-by: [AUTH4]
+specs: [auth5-spec]
 ---
 
 # AUTH5: Deployment, secrets & hardening
