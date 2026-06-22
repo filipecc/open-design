@@ -71,6 +71,8 @@ Delivers **model A** (shared workspace, per-user login) and exposes the authenti
 
 **Validated (spike A, 2026-06-22):** ran a front proxy on `:3000` → web sidecar on internal `127.0.0.1:3001` → daemon. The **full public chain** (hosting proxy → `:3000` proxy → `:3001` sidecar → daemon) returned **200** for the page, `/api/app-config`, and `/api/projects` (real data) with the public `Origin` — **origin trust intact through the extra hop**. Sidecar + daemon bound `127.0.0.1` only → **no-bypass confirmed**. (A pipe-based proxy streamed fine; oauth2-proxy will need `--flush-interval` for SSE, already in Phase 2.) This is exactly oauth2-proxy's position minus the Google gate.
 
+**Validated LIVE end-to-end (2026-06-22):** stood up the real gate — oauth2-proxy v7.15.3 on `:3000` (Google provider, domain-restricted) in front of the internal web sidecar on `:3001`, behind the hosting proxy. Confirmed: unauthenticated → **302 to Google**; a Google account **outside** the allowed domain was **correctly rejected (403)** by oauth2-proxy's `--email-domain` check; an allowed-domain account completed login and **reached the app**. The `/share` carve-out stayed reachable without auth. **AUTH1 works in practice with real Google SSO**, not just in spec. Hardening notes for AUTH5: secrets via env not argv (done); set `--trusted-proxy-ip` to the hosting proxy CIDR (oauth2-proxy warns it trusts all `X-Forwarded-*` by default); the Google OAuth client/consent-screen org must match the intended login domain.
+
 ## Impacted Files
 
 | File | Action | Purpose |
