@@ -15,9 +15,9 @@ created: 2026-06-22
 
 Productionize the multi-user stack: durable per-user data, real secrets handling, a supervised process chain, resource limits, audit/attribution, and a clean upgrade path that keeps absorbing upstream. This closes the persistence and access-control open questions in `01-product/03-open-questions.md`.
 
-Target topology (unchanged maestru.dev proxy in front):
+Target topology (unchanged hosting proxy in front):
 ```
-maestru.dev proxy → oauth2-proxy(:3000) → router(:3001) → orchestrator → per-user {web, daemon}  → shared ~/.claude
+hosting proxy → oauth2-proxy(:3000) → router(:3001) → orchestrator → per-user {web, daemon}  → shared ~/.claude
                                                                               └ /var/lib/open-design/users/<ns>/ (durable)
 ```
 
@@ -27,7 +27,7 @@ maestru.dev proxy → oauth2-proxy(:3000) → router(:3001) → orchestrator →
 
 **Phase 2 — Secrets.** Google `client_secret`, oauth2-proxy `cookie-secret`, and any MCP client credentials via env/secret store (not git). `.env.example` documents the required set; real values injected at deploy.
 
-**Phase 3 — Supervision.** Compose (or systemd) for oauth2-proxy + router + orchestrator as long-lived services; the maestru.dev proxy still targets `:3000`. Health checks + restart policy.
+**Phase 3 — Supervision.** Compose (or systemd) for oauth2-proxy + router + orchestrator as long-lived services; the hosting proxy still targets `:3000` (whatever public host fronts the deployment). Health checks + restart policy.
 
 **Phase 4 — Hardening.** Per-instance daemon stays loopback (the AUTH1 no-bypass invariant applies to *every* per-user instance, not just the gate); the router strips any inbound `X-Forwarded-*` it didn't set; concurrent-instance ceiling + LRU teardown; rate limits. The **public share routes (AUTH6)** are the only unauthenticated surface — verify they expose read-only single artifacts and no `/api` reachability. **Audit log** of logins, runs, and share create/view keyed by `X-Forwarded-Email` for attribution (the shared Claude Code account makes per-user attribution otherwise invisible).
 

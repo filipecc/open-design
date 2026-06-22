@@ -19,7 +19,7 @@ Verified feasible (`tools/dev` namespaces isolate IPC sockets + runtime dirs at 
 
 Chain after this item:
 ```
-maestru.dev → oauth2-proxy(:3000) → ROUTER(:3001) → per-user web sidecar(:30xx) → per-user daemon → shared ~/.claude
+hosting proxy → oauth2-proxy(:3000) → ROUTER(:3001) → per-user web sidecar(:30xx) → per-user daemon → shared ~/.claude
 ```
 
 This item owns the **mapping + routing contract + registry**; actual spawn/teardown is AUTH3. Code lives under a new clearly-owned `gateway/` dir (additive — no Open Design edits).
